@@ -162,3 +162,6 @@ NAME                               READY   AGE
 statefulset.apps/cluster-1-5h6xt   1/1     6m45s
 
 ```
+Note: Argo CLI, helm upgrade ingress-nginx ingress-nginx/ingress-nginx -n ingress-nginx --create-namespace --set controller.publishService.enabled=true --set controller.extraArgs.enable-ssl-passthrough=true 
+
+
