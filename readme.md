@@ -67,7 +67,7 @@ helm install crossplane --namespace crossplane-system crossplane-stable/crosspla
 ### provider-helm
 install [provider-helm](https://github.com/crossplane-contrib/provider-helm) to later install the `vcluster` chart via compositions
 ```bash
-kubectl crossplane install provider crossplane/provider-helm:v0.9.0
+./kubectl-crossplane install provider crossplane/provider-helm:v0.9.0
 
 # in-cluster rbac, so that provider-helm is allowed to install helm charts into the host cluster
 SA=$(kubectl -n crossplane-system get sa -o name | grep provider-helm | sed -e 's|serviceaccount\/|crossplane-system:|g')
@@ -78,14 +78,14 @@ kubectl apply -f provider-helm/providerconfig.yaml
 ### provider-argocd
 Install [provider-argocd](https://github.com/crossplane-contrib/provider-argocd) to register the `vcluster` at ArgoCD:
 ```bash
-kubectl crossplane install provider crossplane/provider-argocd:v0.1.0
+./kubectl-crossplane install provider crossplane/provider-argocd:v0.1.0
 kubectl apply -f provider-argocd/providerconfig.yaml
 ```
 
 ### provider-kubernetes
 Install [provider-kubernetes](https://github.com/crossplane-contrib/provider-kubernetes) to create an ArgoCD `application`:
 ```bash
-kubectl crossplane install provider crossplane/provider-kubernetes:main
+./kubectl-crossplane install provider crossplane/provider-kubernetes:main
 
 SA=$(kubectl -n crossplane-system get sa -o name | grep provider-kubernetes | sed -e 's|serviceaccount\/|crossplane-system:|g')
 kubectl create clusterrolebinding provider-kubernetes-admin-binding --clusterrole cluster-admin --serviceaccount="${SA}"
