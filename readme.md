@@ -129,17 +129,36 @@ kubectl apply -f crossplane/xrc.yaml
 ```
 They will show up in the `default` namespace:
 ```bash
-$ kubectl get cluster
-NAME        READY   CONNECTION-SECRET   AGE
-cluster-1   True                        6m18s
-cluster-2   True                        77s
+d$ vcluster list
+
+ NAME              NAMESPACE         STATUS    CONNECTED   CREATED                          AGE     CONTEXT            
+ cluster-2-gqcxj   cluster-2-gqcxj   Running               2023-07-03 10:05:15 +0300 EEST   5m16s   k3d-argo-vcluster  
+ cluster-1-5h6xt   cluster-1-5h6xt   Running               2023-07-03 10:05:15 +0300 EEST   5m16s   k3d-argo-vcluster  
+
 ```
 For each a respective cluster-scoped resource is created:
 ```bash
 $ kubectl get xcluster
-NAME              READY   COMPOSITION                AGE
-cluster-1-2cs2c   True    xcluster.cnp.example.org   6m18s
-cluster-2-vnmdm   True    xcluster.cnp.example.org   77s
+NAME              SYNCED   READY   COMPOSITION                AGE
+cluster-1-5h6xt   True     False   xcluster.cnp.example.org   5m57s
+cluster-2-gqcxj   True     False   xcluster.cnp.example.org   5m57s
+
 ```
 And finally there should be new `namespaces` in the host cluster, with pods running `vcluster` and the ArgoCD guestbook application.
 At ArgoCD, there should be two Kubernetes clusters and to each a corresponding guestbook application (see screenshot at the top).
+```
+$ kubectl get all -n cluster-1-5h6xt
+NAME                                                          READY   STATUS    RESTARTS   AGE
+pod/cluster-1-5h6xt-0                                         2/2     Running   0          6m44s
+pod/coredns-85cb69466-x452l-x-kube-system-x-cluster-1-5h6xt   1/1     Running   0          5m39s
+
+NAME                                                      TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)                  AGE
+service/cluster-1-5h6xt-headless                          ClusterIP   None           <none>        443/TCP                  6m44s
+service/cluster-1-5h6xt                                   ClusterIP   10.43.92.231   <none>        443/TCP                  6m44s
+service/cluster-1-5h6xt-node-k3d-argo-vcluster-server-0   ClusterIP   10.43.37.204   <none>        10250/TCP                5m39s
+service/kube-dns-x-kube-system-x-cluster-1-5h6xt          ClusterIP   10.43.108.87   <none>        53/UDP,53/TCP,9153/TCP   5m40s
+
+NAME                               READY   AGE
+statefulset.apps/cluster-1-5h6xt   1/1     6m45s
+
+```
