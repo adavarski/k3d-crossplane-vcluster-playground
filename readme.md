@@ -120,12 +120,12 @@ Now that we have everything in place we can get started and schedule some Kubern
 
 First create the composition and the corresponding composite resource definition:
 ```bash
-k apply -f crossplane/composition.yaml
-k apply -f crossplane/xrd.yaml
+kubectl apply -f crossplane/composition.yaml
+kubectl apply -f crossplane/xrd.yaml
 ```
 And now the actual clusters:
 ```bash
-k apply -f crossplane/xrc.yaml
+kubectl apply -f crossplane/xrc.yaml
 ```
 They will show up in the `default` namespace:
 ```bash
