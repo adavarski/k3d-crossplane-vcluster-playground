@@ -93,6 +93,29 @@ kubectl apply -f provider-kubernetes/providerconfig.yaml
 ```
 
 ## Kubernetes in Kubernetes
+
+NOTE: To get the CIDR range, we can execute:
+
+```bash
+$ kubectl create service clusterip test --clusterip 1.1.1.1 --tcp=80:80
+
+error: failed to create ClusterIP service: Service "test" is invalid: spec.clusterIPs: Invalid value: []string{"1.1.1.1"}: failed to allocate IP 1.1.1.1: the provided IP (1.1.1.1) is not in the valid range. The range of valid IPs is 10.43.0.0/16
+
+```
+
+The valid IP range will be displayed in the command output. Here it is `10.43.0.0/16`
+
+Edit file crossplane/composition.yaml:
+```
+...
+              vcluster:
+                # image: rancher/k3s:v1.19.5-k3s2 
+                extraArgs:
+                  - --service-cidr=10.43.0.0/16
+...
+```
+
+
 Now that we have everything in place we can get started and schedule some Kubernetes clusters in our host cluster.
 
 First create the composition and the corresponding composite resource definition:
