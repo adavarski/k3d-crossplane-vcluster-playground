@@ -1,23 +1,44 @@
-# vcluster with provider-argocd
+## Crossplane + vcluster with provider-argocd (GitOps)
+
 This repo contains a crossplane composition to spin up [virtual Kubernetes clusters](https://www.vcluster.com/) which are automatically registered at [ArgoCD](https://argo-cd.readthedocs.io/en/stable/) (via [provider-argocd](https://github.com/crossplane-contrib/provider-argocd)):
 
 ![](argocd.png)
 
+###  Prerequisites
 
-## Install ArgoCD
-Bring up a local ArgoCD instance if you don't have a hosted one available:
-```bash
-kubectl create ns argocd
-kubectl apply -n argocd --force -f https://raw.githubusercontent.com/argoproj/argo-cd/release-2.2/manifests/install.yaml
-kubectl -n argocd port-forward svc/argocd-server 8080:8080
+- [Docker](https://docs.docker.com/engine/install/ubuntu/)
+- [kubectl](https://kubernetes.io/docs/tasks/tools/#kubectl)
+- [helm](https://helm.sh/docs/intro/install/)
+- [k3d](https://k3d.io/#installation)
+- [vcluster](https://www.vcluster.com/docs/getting-started/setup)
+- [kubectl-crossplane](https://docs.crossplane.io/v1.10/getting-started/install-configure/)
 ```
-get admin password for web login:
-```bash
-kubectl view-secret argocd-initial-admin-secret -n argocd -q
+### Install vlcuster CLI (example):
+curl -L -o vcluster "https://github.com/loft-sh/vcluster/releases/latest/download/vcluster-linux-amd64" && sudo install -c -m 0755 vcluster /usr/local/bin && rm -f vcluster
+### Install kubectl-crossplane CLI
+curl -sL https://raw.githubusercontent.com/crossplane/crossplane/master/install.sh | sh
 ```
 
-add a user for [provider-argocd](https://github.com/crossplane-contrib/provider-argocd):
+### Setup environment
+
+```
+cd scripts/ && ./init-k3d-demo-env.sh
+
+Example Output:
+
+$ ./init-k3d-demo-env.sh 
+....
+....
+....
+ArcgoCD admin password:
+V7JBqouePrCmtzwj
+```
+
+add a user for [provider-argocd](https://argo-cd.readthedocs.io/en/stable/operator-manual/user-management/):
 ```bash
+
+kubectl apply -f user-provider-argcod.yaml
+
 kubectl patch configmap/argocd-cm \
   -n argocd \
   --type merge \
@@ -30,9 +51,10 @@ kubectl patch configmap/argocd-rbac-cm \
 ```
 create JWTs and a corresponding Kubernetes Secret, so that `provider-argocd` is able to connect to ArgoCD:
 ```bash
-ARGOCD_ADMIN_SECRET=$(kubectl view-secret argocd-initial-admin-secret -n argocd -q)
-ARGOCD_ADMIN_TOKEN=$(curl -s -X POST -k -H "Content-Type: application/json" --data '{"username":"admin","password":"'$ARGOCD_ADMIN_SECRET'"}' https://localhost:8080/api/v1/session | jq -r .token)
-ARGOCD_TOKEN=$(curl -s -X POST -k -H "Authorization: Bearer $ARGOCD_ADMIN_TOKEN" -H "Content-Type: application/json" https://localhost:8080/api/v1/account/provider-argocd/token | jq -r .token)
+ARGOCD_ADMIN_SECRET=V7JBqouePrCmtzwj
+ARGOCD_ADMIN_TOKEN=$(curl -s -X POST -k -H "Content-Type: application/json" --data '{"username":"admin","password":"'$ARGOCD_ADMIN_SECRET'"}' http://argocd.192.168.1.99.nip.io:8080/api/v1/session | jq -r .token)
+ARGOCD_TOKEN=$(curl -s -X POST -k -H "Authorization: Bearer $ARGOCD_ADMIN_TOKEN" -H "Content-Type: application/json" http://argocd.192.168.1.99.nip.io:8080/api/v1/account/provider-argocd/token | jq -r .token)
+kubectl create ns crossplane-system
 kubectl create secret generic argocd-credentials -n crossplane-system --from-literal=authToken="$ARGOCD_TOKEN"
 ```
 
