@@ -162,6 +162,6 @@ NAME                               READY   AGE
 statefulset.apps/cluster-1-5h6xt   1/1     6m45s
 
 ```
-Note: ssl passthrough has to be enabled for argocd grpc to work. The configuration provided for split ingress in argocd documentation doesn't work. UI login is successfull. However cli login doesn't work -> Argo CLI : `helm upgrade ingress-nginx ingress-nginx/ingress-nginx -n ingress-nginx --create-namespace --set controller.publishService.enabled=true --set controller.extraArgs.enable-ssl-passthrough=true` 
+Note: ssl passthrough has to be enabled for argocd grpc to work. The configuration provided for split ingress in argocd documentation doesn't work. UI login is successfull. However cli login doesn't work -> Argo CLI : `helm upgrade ingress-nginx ingress-nginx/ingress-nginx -n ingress-nginx --create-namespace --set controller.publishService.enabled=true --set controller.extraArgs.enable-ssl-passthrough=true` # or just make port forwarding (kubectl port-forward svc/argocd-server -n argocd 8080:443), then: $ argocd login localhost:8080 --username admin --password
 
 
